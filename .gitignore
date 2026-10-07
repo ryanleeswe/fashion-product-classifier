@@ -1,0 +1,15 @@
+# Bỏ qua toàn bộ ảnh gốc và ảnh đã lọc
+images/
+training_images/
+
+# Bỏ qua các file dữ liệu nặng và file nén
+*.csv
+*.zip
+
+# Bỏ qua các file rác sinh ra trong quá trình chạy Python và Jupyter
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+
+# Bỏ qua cấu hình IDE cá nhân
+.vscode/
