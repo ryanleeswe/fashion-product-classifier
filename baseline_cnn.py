@@ -30,6 +30,40 @@ class BaselineCNN(nn.Module):
         return self.classifier(x)
 
 
+class ImprovedCNN(nn.Module):
+    """CNN cải tiến với BatchNorm, LeakyReLU, Dropout và Global Average Pooling."""
+
+    def __init__(self, num_classes: int = 4, dropout_rate: float = 0.3) -> None:
+        super().__init__()
+
+        self.features = nn.Sequential(
+            nn.Conv2d(3, 32, kernel_size=3, padding=1),
+            nn.BatchNorm2d(32),
+            nn.LeakyReLU(negative_slope=0.01, inplace=True),
+            nn.MaxPool2d(kernel_size=2),
+
+            nn.Conv2d(32, 64, kernel_size=3, padding=1),
+            nn.BatchNorm2d(64),
+            nn.LeakyReLU(negative_slope=0.01, inplace=True),
+            nn.MaxPool2d(kernel_size=2),
+
+            nn.Conv2d(64, 128, kernel_size=3, padding=1),
+            nn.BatchNorm2d(128),
+            nn.LeakyReLU(negative_slope=0.01, inplace=True),
+            nn.AdaptiveAvgPool2d((1, 1)),
+        )
+
+        self.classifier = nn.Sequential(
+            nn.Flatten(start_dim=1),
+            nn.Dropout(p=dropout_rate),
+            nn.Linear(128, num_classes),
+        )
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        x = self.features(x)
+        return self.classifier(x)
+
+
 if __name__ == "__main__":
     # Kiểm tra nhanh mô hình với một ảnh giả.
     model = BaselineCNN()
