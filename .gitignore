@@ -1,10 +1,13 @@
 # Bỏ qua toàn bộ ảnh gốc và ảnh đã lọc
 images/
 training_images/
+benchmark_images/
 
 # Bỏ qua các file dữ liệu nặng và file nén
 *.csv
 *.zip
+*.pth
+checkpoints/
 
 # Bỏ qua các file rác sinh ra trong quá trình chạy Python và Jupyter
 __pycache__/
