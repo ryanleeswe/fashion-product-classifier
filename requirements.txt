@@ -1,0 +1,8 @@
+# Cài torch/torchvision tương thích theo nền tảng và CPU/GPU đang dùng.
+torch>=2.0
+torchvision>=0.15
+numpy
+pandas
+Pillow
+scikit-learn
+matplotlib
