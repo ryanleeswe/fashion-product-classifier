@@ -6,6 +6,7 @@ import argparse
 import csv
 import json
 import random
+import sys
 import time
 from pathlib import Path
 
@@ -385,6 +386,8 @@ def run_model(
 
 
 def main():
+    if hasattr(sys.stdout, "reconfigure"):
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
     args = parse_args()
     if args.epochs < 1 or args.batch_size < 1:
         raise ValueError("epochs và batch-size phải lớn hơn 0.")

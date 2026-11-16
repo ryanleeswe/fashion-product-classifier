@@ -17,6 +17,7 @@ Kết quả nằm trong thư mục --out (mặc định eval_output).
 
 import argparse
 import shutil
+import sys
 from pathlib import Path
 
 import matplotlib
@@ -25,15 +26,15 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import torch
-import torch.nn as nn
 import torch.nn.functional as F
 from PIL import Image
 from sklearn.metrics import classification_report, confusion_matrix
 from sklearn.model_selection import train_test_split
 from torch.utils.data import DataLoader, Dataset
-from torchvision import models, transforms
+from torchvision import transforms
 
 from baseline_cnn import BaselineCNN, ImprovedCNN
+from models import create_model
 
 IMG_SIZE = 128
 IMAGENET_MEAN = [0.485, 0.456, 0.406]
@@ -43,19 +44,22 @@ IMAGENET_STD = [0.229, 0.224, 0.225]
 # ----------------------------------------------------------------------------
 # 1. Dữ liệu: chia train/val/test và Dataset
 # ----------------------------------------------------------------------------
-def split_train_val_test(df, label_col, seed=42):
-    """Chia 80/10/10, giữ nguyên tỷ lệ các lớp (stratify).
+def split_train_val_test(df, label_col, seed=42, test_size=0.1, val_size=0.2):
+    """Chia giống train.py: tách test trước, sau đó tách validation.
 
     QUAN TRỌNG: file train phải dùng đúng hàm chia này (cùng seed) thì tập Test
     mới thật sự là ảnh mô hình chưa từng thấy.
     """
     labels = df[label_col]
     idx = np.arange(len(df))
-    train_idx, temp_idx = train_test_split(
-        idx, test_size=0.2, stratify=labels, random_state=seed
+    train_val_idx, test_idx = train_test_split(
+        idx, test_size=test_size, stratify=labels, random_state=seed
     )
-    val_idx, test_idx = train_test_split(
-        temp_idx, test_size=0.5, stratify=labels.iloc[temp_idx], random_state=seed
+    train_idx, val_idx = train_test_split(
+        train_val_idx,
+        test_size=val_size / (1.0 - test_size),
+        stratify=labels.iloc[train_val_idx],
+        random_state=seed,
     )
     return train_idx, val_idx, test_idx
 
@@ -84,19 +88,7 @@ class ImageDataset(Dataset):
 # 2. Khởi tạo mô hình và chọn lớp để làm Grad-CAM
 # ----------------------------------------------------------------------------
 def build_model(name, num_classes):
-    if name == "baseline":
-        return BaselineCNN(num_classes)
-    if name == "improved":
-        return ImprovedCNN(num_classes)
-    if name == "resnet18":
-        m = models.resnet18(weights=None)
-        m.fc = nn.Linear(m.fc.in_features, num_classes)
-        return m
-    if name == "efficientnet_b0":
-        m = models.efficientnet_b0(weights=None)
-        m.classifier[1] = nn.Linear(m.classifier[1].in_features, num_classes)
-        return m
-    raise ValueError(f"Chưa hỗ trợ mô hình: {name}")
+    return create_model(name, num_classes=num_classes, pretrained=False)
 
 
 def get_target_layer(model, name):
@@ -105,7 +97,7 @@ def get_target_layer(model, name):
         return model.features[4]    # ReLU sau Conv thứ 2 -> 32x32x32
     if name == "improved":
         return model.features[10]   # LeakyReLU sau Conv thứ 3 -> 128x32x32
-    if name == "resnet18":
+    if name in ("resnet18", "resnet18_se"):
         return model.layer4[-1]
     if name == "efficientnet_b0":
         return model.features[-1]
@@ -267,9 +259,11 @@ def save_gradcam_case(cam_engine, row, img_dir, classes, out_dir, imagenet_norm,
 # 6. Chương trình chính
 # ----------------------------------------------------------------------------
 def main():
+    if hasattr(sys.stdout, "reconfigure"):
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
     p = argparse.ArgumentParser()
     p.add_argument("--model", default="improved",
-                   choices=["baseline", "improved", "resnet18", "efficientnet_b0"])
+                   choices=["baseline", "improved", "resnet18", "resnet18_se", "efficientnet_b0"])
     p.add_argument("--weights", default="best_model.pth")
     p.add_argument("--csv", default="clean_dataset.csv")
     p.add_argument("--img_dir", default="training_images")

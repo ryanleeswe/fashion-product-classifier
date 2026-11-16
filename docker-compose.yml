@@ -1,0 +1,15 @@
+services:
+  fashion-demo:
+    build:
+      context: .
+    image: fashion-product-classifier:local
+    ports:
+      - "8501:8501"
+    environment:
+      FASHION_MODEL: ${FASHION_MODEL:-baseline}
+      FASHION_MODEL_PATH: ${FASHION_MODEL_PATH:-/app/baseline_cnn.pth}
+      FASHION_CSV_PATH: ${FASHION_CSV_PATH:-/app/clean_dataset.csv}
+    volumes:
+      - ./checkpoints:/app/checkpoints:ro
+      - ./datasets:/app/datasets:ro
+    restart: unless-stopped
