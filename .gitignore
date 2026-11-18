@@ -21,3 +21,9 @@ __pycache__/
 
 # Bỏ qua cấu hình IDE cá nhân
 .vscode/
+
+# Bỏ qua môi trường Python và cache runtime
+.venv/
+.venv-1/
+__pycache__/
+.torch_cache/

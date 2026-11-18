@@ -1,4 +1,4 @@
-"""Train and benchmark the project's CNN and pretrained model options."""
+"""Huấn luyện và so sánh các mô hình CNN và mô hình tiền huấn luyện."""
 
 from __future__ import annotations
 
@@ -248,7 +248,7 @@ def run_model(
 
     print(
         f"\n[{model_name}] {model_description(model_name)} | "
-        f"parameters={total_params:,} trainable={trainable_params:,} | "
+        f"số tham số={total_params:,} tham số huấn luyện={trainable_params:,} | "
         f"device={device}"
     )
 
@@ -282,7 +282,7 @@ def run_model(
             best_val_loss = val_loss
             best_epoch = epoch
             seconds_to_best = elapsed_seconds
-            # Raw state_dict keeps the checkpoint compatible with the existing best.py.
+            # Lưu state_dict thô để tương thích với các script huấn luyện cũ.
             torch.save(model.state_dict(), checkpoint_path)
             metadata_path = args.output_dir / f"{model_name}_best.json"
             metadata_path.write_text(
@@ -301,11 +301,11 @@ def run_model(
                 encoding="utf-8",
             )
 
-        best_tag = " | saved best" if is_best else ""
+        best_tag = " | đã lưu checkpoint tốt nhất" if is_best else ""
         print(
             f"Epoch {epoch}/{args.epochs} | "
-            f"train loss={train_loss:.4f} acc={train_acc:.4f} | "
-            f"val loss={val_loss:.4f} acc={val_acc:.4f} | "
+            f"loss train={train_loss:.4f} acc={train_acc:.4f} | "
+            f"loss val={val_loss:.4f} acc={val_acc:.4f} | "
             f"{duration:.1f}s{best_tag}"
         )
 
@@ -402,7 +402,7 @@ def main():
     args.output_dir.mkdir(parents=True, exist_ok=True)
     set_seed(args.seed)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    print(f"Device: {device}")
+    print(f"Thiết bị: {device}")
 
     train_loader, val_loader, test_loader, classes, class_to_idx = build_loaders(
         args.csv,
@@ -414,7 +414,7 @@ def main():
         device,
     )
     print(
-        f"Data: {len(train_loader.dataset)} train / "
+        f"Dữ liệu: {len(train_loader.dataset)} train / "
         f"{len(val_loader.dataset)} validation / {len(test_loader.dataset)} test | "
         f"{len(classes)} classes"
     )

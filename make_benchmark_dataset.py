@@ -1,4 +1,4 @@
-"""Create a benchmark subset without changing the existing prepare_data.py."""
+"""Tạo bộ dữ liệu benchmark mà không thay đổi luồng của prepare_data.py."""
 
 import argparse
 import shutil
@@ -46,11 +46,11 @@ def main():
 
     categories = [name.strip() for name in args.categories.split(",") if name.strip()]
     if len(categories) < 2:
-        raise ValueError("Benchmark cần ít nhất hai category.")
+        raise ValueError("Bộ benchmark cần ít nhất hai loại sản phẩm.")
     available = set(dataframe["articleType"].dropna().astype(str))
     unknown = set(categories).difference(available)
     if unknown:
-        raise ValueError("Không có category trong CSV: " + ", ".join(sorted(unknown)))
+        raise ValueError("Không có loại sản phẩm trong CSV: " + ", ".join(sorted(unknown)))
 
     output_rows = []
     args.output_image_dir.mkdir(parents=True, exist_ok=True)
@@ -76,6 +76,7 @@ def main():
             )
 
     output = pd.DataFrame(output_rows, columns=dataframe.columns)
+    # Tạo thư mục đầu ra nếu thư mục đó chưa tồn tại.
     args.output_csv.parent.mkdir(parents=True, exist_ok=True)
     output.to_csv(args.output_csv, index=False)
     print(f"Đã lưu {len(output)} dòng: {args.output_csv.resolve()}")

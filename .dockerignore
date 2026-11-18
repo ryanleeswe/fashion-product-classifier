@@ -1,6 +1,10 @@
 .git
 .gitignore
 __pycache__/
+.venv/
+.venv-1/
+.torch_cache/
+__pycache__/
 *.py[cod]
 .ipynb_checkpoints/
 .vscode/

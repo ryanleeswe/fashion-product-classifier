@@ -326,7 +326,7 @@ def main():
 
     # --- Chỉ số ---
     acc = res["correct"].mean()
-    print(f"\nTest accuracy: {acc:.4f} ({res['correct'].sum()}/{len(res)})")
+    print(f"\nĐộ chính xác trên tập test: {acc:.4f} ({res['correct'].sum()}/{len(res)})")
 
     labels_range = list(range(len(classes)))
     cm = confusion_matrix(y_true, y_pred, labels=labels_range)

@@ -63,7 +63,7 @@ class FashionDataset(Dataset):
         return transform(image), class_to_idx[row[LABEL_COL]]
 
 
-# Chia 80/10/10, giống evaluate_basic.py
+# Chia dữ liệu 80/10/10, cùng seed với bộ đánh giá.
 indices = list(range(len(df)))
 labels = df[LABEL_COL]
 train_idx, temp_idx = train_test_split(
@@ -85,4 +85,4 @@ history, best_val_acc = fit_best(
     num_epochs=NUM_EPOCHS, lr=1e-3, device="cpu", save_path=SAVE_PATH)
 
 print(f"\nXong. Đã lưu mô hình tốt nhất vào: {SAVE_PATH}")
-print("Giờ chạy:  python3 evaluate_basic.py")
+print("Giờ chạy: python evaluate.py")

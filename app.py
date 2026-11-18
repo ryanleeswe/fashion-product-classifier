@@ -19,12 +19,12 @@ EVAL_DIR = Path(
 ).expanduser()
 IMAGE_SIZE = 128
 TOP_K = 3
-CONFUSION_MARGIN = 0.10  # Top-1/top-2 gap threshold (10 percentage points).
+CONFUSION_MARGIN = 0.10  # Ngưỡng chênh Top-1/Top-2 là 10 phần trăm.
 IMAGENET_MEAN = np.array([0.485, 0.456, 0.406], dtype=np.float32)
 IMAGENET_STD = np.array([0.229, 0.224, 0.225], dtype=np.float32)
 
 st.set_page_config(
-    page_title="Fashion AI Classifier & XAI",
+    page_title="Hệ thống phân loại thời trang và giải thích AI",
     page_icon="🛍️",
     layout="centered",
 )
@@ -35,7 +35,7 @@ st.markdown("Tích hợp Deep Learning, Transfer Learning và Giải thích AI (
 
 @st.cache_data
 def load_class_names() -> list[str]:
-    """Load classes in the same sorted order used during training."""
+    """Nạp danh sách lớp theo đúng thứ tự chữ cái đã dùng khi huấn luyện."""
     if DATASET_PATH.is_file():
         classes = (
             pd.read_csv(DATASET_PATH)["articleType"]
@@ -55,7 +55,7 @@ CLASS_NAMES = load_class_names()
 
 @st.cache_resource
 def load_trained_model() -> tuple[torch.nn.Module, torch.device]:
-    """Load the selected model checkpoint for the web demo."""
+    """Nạp checkpoint của mô hình đã chọn cho ứng dụng web."""
     if not MODEL_PATH.is_file():
         raise FileNotFoundError(f"Không tìm thấy checkpoint: {MODEL_PATH.name}")
 
@@ -85,7 +85,7 @@ def make_gradcam(
     image_array: np.ndarray,
     model_name: str,
 ) -> np.ndarray:
-    """Create a Grad-CAM overlay for the last convolution in BaselineCNN."""
+    """Tạo bản overlay Grad-CAM tại lớp tích chập cuối của mô hình."""
     activations: list[torch.Tensor] = []
     gradients: list[torch.Tensor] = []
     if model_name in ("baseline", "improved"):

@@ -1,4 +1,4 @@
-"""Model factory for the fashion classifier experiments."""
+"""Kho tạo mô hình dùng trong các thí nghiệm phân loại thời trang."""
 
 from __future__ import annotations
 
@@ -13,7 +13,7 @@ MODEL_NAMES = ("baseline", "improved", "resnet18", "resnet18_se", "efficientnet_
 
 
 class ResNet18SE(nn.Module):
-    """ResNet-18 pretrained, augmented with channel attention on final features."""
+    """ResNet-18 tiền huấn luyện với cơ chế chú ý kênh ở đặc trưng cuối."""
 
     def __init__(self, num_classes: int, pretrained: bool, dropout_rate: float) -> None:
         super().__init__()
@@ -27,7 +27,7 @@ class ResNet18SE(nn.Module):
         self.layer3 = backbone.layer3
         self.layer4 = backbone.layer4
         channels = backbone.fc.in_features
-        # SE-style channel attention reweights the final feature channels.
+        # Chú ý kênh điều chỉnh mức quan trọng của từng đặc trưng cuối.
         hidden = max(channels // 16, 8)
         self.channel_attention = nn.Sequential(
             nn.AdaptiveAvgPool2d(1),
@@ -59,7 +59,7 @@ def create_model(
     pretrained: bool = True,
     dropout_rate: float = 0.3,
 ) -> nn.Module:
-    """Create the requested model and replace pretrained classifiers as needed."""
+    """Tạo mô hình được yêu cầu và thay lớp phân loại theo số lớp dữ liệu."""
     name = name.lower().replace("-", "_")
 
     if name == "baseline":
@@ -100,7 +100,7 @@ def create_model(
 
 
 def count_parameters(model: nn.Module) -> tuple[int, int]:
-    """Return (all parameters, trainable parameters)."""
+    """Trả về tổng số tham số và số tham số có thể huấn luyện."""
     total = sum(parameter.numel() for parameter in model.parameters())
     trainable = sum(
         parameter.numel()
@@ -112,10 +112,10 @@ def count_parameters(model: nn.Module) -> tuple[int, int]:
 
 def model_description(name: str) -> str:
     descriptions = {
-        "baseline": "2 Conv blocks + flatten + Linear",
-        "improved": "3 Conv blocks + BatchNorm + LeakyReLU + GAP + Dropout",
-        "resnet18": "ImageNet ResNet-18 + Dropout classifier head",
-        "resnet18_se": "ImageNet ResNet-18 + SE-style channel attention + Dropout head",
-        "efficientnet_b0": "ImageNet EfficientNet-B0 + Dropout classifier head",
+        "baseline": "2 khối Conv + làm phẳng + Linear",
+        "improved": "3 khối Conv + BatchNorm + LeakyReLU + GAP + Dropout",
+        "resnet18": "ResNet-18 tiền huấn luyện trên ImageNet + đầu phân loại Dropout",
+        "resnet18_se": "ResNet-18 tiền huấn luyện trên ImageNet + chú ý kênh + đầu phân loại Dropout",
+        "efficientnet_b0": "EfficientNet-B0 tiền huấn luyện trên ImageNet + đầu phân loại Dropout",
     }
     return descriptions[name]

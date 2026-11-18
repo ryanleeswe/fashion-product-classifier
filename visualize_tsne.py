@@ -1,4 +1,4 @@
-"""Create a 2D t-SNE plot from penultimate-layer test features."""
+"""Tạo biểu đồ t-SNE hai chiều từ đặc trưng lớp trước lớp phân loại."""
 
 from __future__ import annotations
 
@@ -36,9 +36,12 @@ def main() -> None:
     parser.add_argument("--imagenet_norm", action="store_true")
     args = parser.parse_args()
 
+    # Đọc dữ liệu và thống nhất thứ tự chỉ số lớp trong toàn bộ quá trình chạy.
     df = pd.read_csv(args.csv).dropna(subset=["id", "articleType"]).reset_index(drop=True)
     classes = sorted(df["articleType"].astype(str).unique())
     class_to_idx = {name: index for index, name in enumerate(classes)}
+
+    # Dùng test CSV có sẵn nếu được truyền vào; nếu không thì tạo lại cùng split seed=42.
     if args.test_csv:
         test_df = pd.read_csv(args.test_csv).dropna(subset=["id", "articleType"])
     else:
@@ -46,6 +49,8 @@ def main() -> None:
         test_df = df.iloc[test_indices]
     test_df = test_df.copy()
     test_df["articleType"] = test_df["articleType"].astype(str)
+
+    # Giới hạn số ảnh mỗi lớp để t-SNE chạy nhanh và tránh tập dữ liệu không cân bằng chi phối biểu đồ.
     if args.max_per_class > 0:
         test_df = pd.concat(
             [
@@ -66,6 +71,8 @@ def main() -> None:
     model = build_model(args.model, len(classes))
     model.load_state_dict(torch.load(args.weights, map_location=device))
     model.to(device).eval()
+
+    # Chọn lớp classification head tương ứng để đăng ký hook lấy đặc trưng trước khi phân loại.
     if args.model in ("baseline", "improved"):
         target = model.classifier
     elif args.model == "resnet18":
@@ -75,6 +82,7 @@ def main() -> None:
     else:
         target = model.classifier[1]
 
+    # Hook lưu vector đầu vào của lớp classification head cho từng batch ảnh.
     feature_batches: list[torch.Tensor] = []
     def capture_features(_module, inputs):
         feature_batches.append(inputs[0].detach().flatten(start_dim=1).cpu())
@@ -90,12 +98,15 @@ def main() -> None:
     labels = test_df["articleType"].to_numpy()
     if len(features) < 3:
         raise ValueError("Cần ít nhất 3 ảnh để tạo biểu đồ t-SNE.")
+
+    # Kích thước tối đa hợp lệ của perplexity và PCA được lấy từ dữ liệu hiện tại.
     perplexity = min(30.0, float(len(features) - 1))
     pca_dimensions = min(50, features.shape[0], features.shape[1])
     reduced_features = PCA(n_components=pca_dimensions, svd_solver="randomized",
                             random_state=args.seed).fit_transform(features)
     points = TSNE(n_components=2, perplexity=perplexity, init="pca", learning_rate="auto", random_state=args.seed).fit_transform(reduced_features)
 
+    # Vẽ từng lớp bằng một màu riêng và hiển thị số lượng ảnh tương ứng.
     fig, ax = plt.subplots(figsize=(11, 8))
     palette = plt.get_cmap("tab10")
     for index, class_name in enumerate(classes):
@@ -103,7 +114,7 @@ def main() -> None:
         if mask.any():
             ax.scatter(points[mask, 0], points[mask, 1], s=18, alpha=0.75,
                        color=palette(index % 10), label=f"{class_name} (n={mask.sum()})")
-    ax.set_title(f"t-SNE penultimate features — {args.model} ({len(features)} test images)")
+    ax.set_title(f"Đặc trưng lớp trước phân loại — {args.model} ({len(features)} ảnh test)")
     ax.set_xlabel("t-SNE 1")
     ax.set_ylabel("t-SNE 2")
     ax.legend(loc="best", fontsize="small", frameon=True)
@@ -113,7 +124,7 @@ def main() -> None:
     output.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(output, dpi=200)
     plt.close(fig)
-    print(f"Saved {output} ({len(features)} images; perplexity={perplexity:g})")
+    print(f"Đã lưu {output} ({len(features)} ảnh; perplexity={perplexity:g})")
 
 
 if __name__ == "__main__":

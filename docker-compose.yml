@@ -1,15 +1,21 @@
 services:
   fashion-demo:
+    # Đặt tên container giống tên dự án để dễ nhận diện khi kiểm tra Docker.
+    container_name: fashion-product-classifier
     build:
       context: .
     image: fashion-product-classifier:local
     ports:
       - "8501:8501"
     environment:
-      FASHION_MODEL: ${FASHION_MODEL:-baseline}
-      FASHION_MODEL_PATH: ${FASHION_MODEL_PATH:-/app/baseline_cnn.pth}
-      FASHION_CSV_PATH: ${FASHION_CSV_PATH:-/app/clean_dataset.csv}
+      # Cấu hình mặc định dùng kết quả huấn luyện mới nhất bằng ResNet-18.
+      FASHION_MODEL: ${FASHION_MODEL:-resnet18}
+      FASHION_MODEL_PATH: ${FASHION_MODEL_PATH:-/app/checkpoints/resnet18_best.pth}
+      FASHION_CSV_PATH: ${FASHION_CSV_PATH:-/app/datasets/upgrade_dataset.csv}
+      FASHION_EVAL_DIR: ${FASHION_EVAL_DIR:-/app/eval_output/upgrade_resnet18}
     volumes:
+      # Mount read-only giúp thay model, CSV và kết quả đánh giá mà không rebuild ảnh.
       - ./checkpoints:/app/checkpoints:ro
       - ./datasets:/app/datasets:ro
+      - ./eval_output:/app/eval_output:ro
     restart: unless-stopped

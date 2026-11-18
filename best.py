@@ -36,7 +36,7 @@ def fit_best(model, train_loader, val_loader, num_epochs=15, lr=1e-3,
         if va_acc > best_val_acc:
             best_val_acc, best_epoch = va_acc, epoch
             torch.save(model.state_dict(), save_path)
-            msg += "  <-- best, đã lưu"
+            msg += "  <-- tốt nhất, đã lưu"
 
         print(msg)
 

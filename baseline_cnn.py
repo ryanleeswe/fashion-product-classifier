@@ -69,4 +69,4 @@ if __name__ == "__main__":
     model = BaselineCNN()
     dummy_image = torch.randn(1, 3, 128, 128)
     output = model(dummy_image)
-    print(f"Output shape: {tuple(output.shape)}")
+    print(f"Kích thước đầu ra: {tuple(output.shape)}")

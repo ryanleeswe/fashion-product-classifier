@@ -1,3 +1,5 @@
+"""Thí nghiệm resize ảnh, chia train/validation/test và định nghĩa augmentation."""
+
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from pathlib import Path
@@ -18,7 +20,7 @@ df = pd.read_csv(CSV_PATH)
 results = []
 failed = []
 
-##### RESIZE 
+# Resize ảnh về kích thước đầu vào thống nhất.
 
 for _, row in df.iterrows():
 
@@ -41,15 +43,15 @@ for _, row in df.iterrows():
     except Exception:
         failed.append(image_id)
 
-# Luu CSV
+# Lưu CSV sau khi resize thành công.
 resized_df = pd.DataFrame(results)
 resized_df.to_csv(OUTPUT_CSV, index=False)
 
 
-#### CHIA TRAIN - VAL - TEST
+# Chia dữ liệu thành train, validation và test.
 
 
-#Chia Train 80%, con lai 20%
+# Dành 80% cho train và 20% cho tập còn lại.
 train_df, temp_df = train_test_split(
     resized_df,
     test_size=0.2,
@@ -57,7 +59,7 @@ train_df, temp_df = train_test_split(
     random_state=42
 )
 
-#Chia Val 10%, Test 10%
+# Chia phần còn lại thành validation 10% và test 10%.
 val_df, test_df = train_test_split(
     temp_df,
     test_size=0.5,
@@ -65,7 +67,7 @@ val_df, test_df = train_test_split(
     random_state=42
 )
 
-# 4. Tao thu muc
+# Tạo thư mục lưu các CSV đã chia.
 output_dir = Path("split_dataset")
 output_dir.mkdir(exist_ok=True)
 
@@ -75,39 +77,38 @@ val_df.to_csv(output_dir / "val.csv", index=False)
 test_df.to_csv(output_dir / "test.csv", index=False)
 
 
-####### ARGUMENTATION CHO TRAIN_ 
+# Định nghĩa augmentation và chuẩn hóa cho train.
 
 from torchvision import transforms
 train_transform = transforms.Compose([
-    # Xoay ngau nhien
+    # Xoay ảnh ngẫu nhiên.
     transforms.RandomRotation(
         degrees=20
     ),
 
-    #Lat ngang voi xac suat 50%
+    # Lật ngang với xác suất 50%.
     transforms.RandomHorizontalFlip(
         p=0.5
     ),
 
-    # Thay doi mau sac va anh sang
+    # Thay đổi màu sắc và độ sáng.
     transforms.ColorJitter(
         brightness=0.2,
         contrast=0.2,
         saturation=0.2,
         hue=0.05
     ),
-   
 
-    # che khuat ngau nhien
+    # Che ngẫu nhiên một vùng của ảnh.
     transforms.RandomErasing(
         p=0.5,
         scale=(0.02, 0.15),
         ratio=(0.3, 3.3),
         value=0
     ),
- #  Chuyen anh thanh Tensor
+    # Chuyển ảnh thành tensor.
     transforms.ToTensor(),
-    # Normalize
+    # Chuẩn hóa tensor.
     transforms.Normalize(
         mean=[0.5, 0.5, 0.5],
         std=[0.5, 0.5, 0.5]
@@ -115,7 +116,7 @@ train_transform = transforms.Compose([
 ])
 
 
-# VALIDATION 
+# Tập validation chỉ resize, chuyển tensor và chuẩn hóa.
 val_transform = transforms.Compose([
     transforms.ToTensor(),
     transforms.Normalize(
@@ -125,7 +126,7 @@ val_transform = transforms.Compose([
 ])
 
 
-# TEST
+# Tập test chỉ chuyển tensor và chuẩn hóa.
 test_transform = transforms.Compose([
     transforms.ToTensor(),
     transforms.Normalize(

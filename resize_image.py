@@ -1,3 +1,5 @@
+"""Thí nghiệm chuyển đổi kích thước ảnh và xem một batch dữ liệu huấn luyện."""
+
 import os
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -7,21 +9,21 @@ from sklearn.model_selection import train_test_split
 from torch.utils.data import Dataset, DataLoader, Subset
 from torchvision import transforms
 
-# 1. KHAI BÁO
+# 1. Khai báo đường dẫn dữ liệu
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 CSV_PATH = os.path.join(BASE_DIR, "clean_dataset.csv")
 IMG_DIR = os.path.join(BASE_DIR, "training_images")
 
 df = pd.read_csv(CSV_PATH)
 
-# 2. ĐỊNH NGHĨA TRANSFORMS
+# 2. Định nghĩa các phép tiền xử lý ảnh
 
 transform = transforms.Compose([
     transforms.Resize((128, 128)),
     transforms.ToTensor()
 ])
 
-#3. XÂY DỰNG DATASET
+# 3. Xây dựng Dataset
 
 class FashionDataset(Dataset):
     def __init__(self, dataframe, img_dir, transform=None):
@@ -52,14 +54,14 @@ class FashionDataset(Dataset):
         label = self.class_to_idx[row["articleType"]]
         return image, label
 
-#4. KHỞI TẠO DATASET
+# 4. Khởi tạo Dataset
 dataset = FashionDataset(
     dataframe=df,
     img_dir=IMG_DIR,
     transform=transform
 )
 
-#5. CHIA TRAIN/VAL: 80 / 20
+# 5. Chia train/validation theo tỷ lệ 80/20
 indices = list(range(len(dataset)))
 labels = df["articleType"].map(
     dataset.class_to_idx
@@ -74,7 +76,7 @@ train_indices, val_indices = train_test_split(
 
 train_dataset = Subset(dataset, train_indices)
 val_dataset = Subset(dataset, val_indices)
-#6. TẠO DATALOADER
+# 6. Tạo DataLoader
 train_loader = DataLoader(
     train_dataset,
     batch_size=32,
@@ -87,7 +89,7 @@ val_loader = DataLoader(
     shuffle=False,
     num_workers=0
 )
-#7. HIỂN THỊ RIÊNG TỪNG ẢNH ĐỂ KIỂM TRA
+# 7. Hiển thị riêng từng ảnh để kiểm tra
 # Lấy một batch từ tập Train
 images, batch_labels = next(iter(train_loader))
 num_images = min(5, len(images))

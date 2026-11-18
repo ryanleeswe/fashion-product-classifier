@@ -50,7 +50,7 @@ Open `colab_train_resnet18.ipynb` in Colab and choose **Runtime > Change runtime
 
 ## Chạy bằng Docker Compose
 
-Docker packages the app, its Python dependencies, `baseline_cnn.pth`, and `clean_dataset.csv`; training images are excluded because the demo only accepts uploaded images.
+Docker đóng gói ứng dụng, thư viện Python và mã nguồn cần thiết. Ảnh training không cần cho màn hình dự đoán, còn checkpoint, CSV và kết quả đánh giá được mount read-only từ thư mục dự án:
 
 ```bash
 docker compose up --build
