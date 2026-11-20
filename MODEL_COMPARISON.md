@@ -34,7 +34,7 @@ python make_benchmark_dataset.py --csv styles.csv --image-dir images
 
 # Thay tên ví dụ bằng các nhãn gần nhau có thật trong danh sách trên
 python make_benchmark_dataset.py --csv styles.csv --image-dir images `
-  --categories "Shirts,Tshirts,Tops,Sweatshirts" --samples-per-category 1000
+  --categories "Shirts,Tshirts,Heels,Sweatshirts" --samples-per-category 1000
 
 # So sánh mọi cấu hình trên cùng split
 python train.py --model all --csv benchmark_dataset.csv `

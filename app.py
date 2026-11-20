@@ -49,7 +49,7 @@ def load_class_names() -> list[str]:
             return classes
     return [
         "Casual Shoes", "Handbags", "Shirts", "Sports Shoes",
-        "Watches", "Tops", "Tshirts", "Jeans",
+        "Watches", "Heels", "Tshirts", "Jeans",
     ]
 
 

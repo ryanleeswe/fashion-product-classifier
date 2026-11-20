@@ -4,7 +4,7 @@ Tài liệu này giúp thành viên mới hiểu luồng từ dữ liệu đến
 
 ## 1. Tóm tắt trong một phút
 
-Dự án phân loại ảnh thời trang thành tám lớp: `Casual Shoes`, `Handbags`, `Jeans`, `Shirts`, `Sports Shoes`, `Tops`, `Tshirts` và `Watches`. Dataset hiện tại có 8.000 ảnh, 1.000 ảnh mỗi lớp. `train.py` chia dữ liệu stratified theo seed 42, huấn luyện model và chọn checkpoint theo validation accuracy.
+Dự án phân loại ảnh thời trang thành tám lớp: `Casual Shoes`, `Handbags`, `Jeans`, `Shirts`, `Sports Shoes`, `Heels`, `Tshirts` và `Watches`. Dataset hiện tại có 8.000 ảnh, 1.000 ảnh mỗi lớp. `train.py` chia dữ liệu stratified theo seed 42, huấn luyện model và chọn checkpoint theo validation accuracy.
 
 ```text
 clean_dataset.csv + training_images/

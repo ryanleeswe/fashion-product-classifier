@@ -9,7 +9,7 @@ pip install -r requirements.txt
 streamlit run app.py
 ```
 
-The target dataset contains 8,000 images across eight classes (1,000 per class): Casual Shoes, Handbags, Jeans, Shirts, Sports Shoes, Tops, Tshirts, and Watches. The demo loads a checkpoint and its matching CSV, then shows the top three predictions and Grad-CAM. It warns when the top two probabilities are within 10 percentage points. An optional panel displays saved evaluation results under `eval_output/upgrade_resnet18` (or `FASHION_EVAL_DIR`).
+The target dataset contains 8,000 images across eight classes (1,000 per class): Casual Shoes, Handbags, Jeans, Shirts, Sports Shoes, Heels, Tshirts, and Watches. The demo loads a checkpoint and its matching CSV, then shows the top three predictions and Grad-CAM. It warns when the top two probabilities are within 10 percentage points. An optional panel displays saved evaluation results under `eval_output/upgrade_resnet18` (or `FASHION_EVAL_DIR`).
 
 To run a trained checkpoint locally, set the model, checkpoint, and matching CSV before starting Streamlit (PowerShell example):
 

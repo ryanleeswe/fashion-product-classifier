@@ -11,7 +11,7 @@ NEW_IMG_DIR = 'training_images'
 # Eight classes used by clean_dataset.csv (1,000 images per class).
 TARGET_CATEGORIES = [
     'Casual Shoes', 'Handbags', 'Shirts', 'Sports Shoes',
-    'Watches', 'Tops', 'Tshirts', 'Jeans',
+    'Watches', 'Heels', 'Tshirts', 'Jeans',
 ]
 SAMPLES_PER_CATEGORY = 1000
 
