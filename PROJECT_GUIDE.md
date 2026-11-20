@@ -4,125 +4,144 @@ Tài liệu này giúp thành viên mới hiểu luồng từ dữ liệu đến
 
 ## 1. Tóm tắt trong một phút
 
-Dự án nhận ảnh sản phẩm thời trang và dự đoán một trong bốn lớp: `Casual Shoes`, `Shirts`, `Sports Shoes`, `Tshirts`. Dataset hiện dùng có 8.032 ảnh, cân bằng với 2.008 ảnh mỗi lớp. ResNet-18 pretrained trên ImageNet được fine-tune bằng PyTorch. Checkpoint tốt nhất đạt validation accuracy 93,71% và test accuracy 93,16% trên 804 ảnh. Ứng dụng Streamlit nhận ảnh mới, hiển thị Top 3 và Grad-CAM.
+Dự án phân loại ảnh thời trang thành tám lớp: `Casual Shoes`, `Handbags`, `Jeans`, `Shirts`, `Sports Shoes`, `Tops`, `Tshirts` và `Watches`. Dataset hiện tại có 8.000 ảnh, 1.000 ảnh mỗi lớp. `train.py` chia dữ liệu stratified theo seed 42, huấn luyện model và chọn checkpoint theo validation accuracy.
 
 ```text
-CSV nhãn + ảnh → chia train/validation/test → ResNet-18 fine-tune
-      → checkpoint tốt nhất → đánh giá test + t-SNE
-      → Streamlit: Top 3 + Grad-CAM + kết quả đánh giá
+clean_dataset.csv + training_images/
+        → train/validation/test
+        → baseline / improved / ResNet18
+        → checkpoint tốt nhất
+        → đánh giá + confusion matrix + t-SNE
+        → Streamlit: Top 3 + Grad-CAM
 ```
+
+Kết quả test hiện có: ResNet18 đạt 95,00%, baseline 89,38%, improved 89,13% trên cùng tập test 800 ảnh. Đây là kết quả của split hiện tại, không đảm bảo cùng hiệu năng trên ảnh bên ngoài dataset.
 
 ## 2. Bản đồ file theo vai trò
 
 ### Dữ liệu và chuẩn bị
 
-- `styles.csv`: metadata nguồn ban đầu.
-- `images/`: ảnh nguồn theo ID.
-- `prepare_data.py`: script chuẩn bị dataset cũ, tạo `clean_dataset.csv` và `training_images/`.
-- `datasets/upgrade_dataset.csv`: nhãn dùng cho lần train hiện tại; các cột chính là `id` và `articleType`.
-- `datasets/anh_tong/`: ảnh dùng cho lần train hiện tại, tên `<id>.jpg` khớp với CSV.
-
-**Lưu ý:** `clean_dataset.csv` + `training_images/` là dữ liệu của luồng cũ/mẫu. Kết quả báo cáo hiện tại dùng `datasets/upgrade_dataset.csv` + `datasets/anh_tong/`. Khi chạy lại, phải truyền đúng cặp CSV và thư mục ảnh.
+- `clean_dataset.csv`: nhãn hiện tại; các cột chính là `id` và `articleType`.
+- `training_images/<id>.jpg`: ảnh khớp ID trong CSV; đây là cặp dữ liệu dùng trong các lệnh train hiện tại.
+- `training_images_old/`: bộ ảnh cũ; không dùng cho kết quả hiện tại.
+- `prepare_data.py`: lấy tám lớp, tối đa 1.000 ảnh hợp lệ mỗi lớp từ `styles.csv` và `images/`, rồi tạo `clean_dataset.csv` và `training_images/`.
+- `resize_chia_argumentation_normalize.py`: luồng thử nghiệm tạo ảnh resize và CSV chia tập riêng. `train.py` hiện resize và augmentation trực tiếp lúc nạp ảnh, nên file này không cần chạy cho pipeline chính.
 
 ### Model và huấn luyện
 
-- `models.py`: định nghĩa kiến trúc. Với `--model resnet18`, lấy ResNet-18 pretrained ImageNet rồi thay lớp phân loại cuối cho số lớp của dự án.
-- `train.py`: xác thực dữ liệu, chia tập có stratify, huấn luyện, chọn checkpoint theo validation và lưu các chỉ số.
-- `train_val.py`: các vòng lặp train một epoch và validation được `train.py` gọi.
-- `checkpoints/resnet18_best.pth`: trọng số model tốt nhất; được dùng trong đánh giá và app.
-- `checkpoints/epoch_metrics.csv`: loss và accuracy theo epoch.
-- `checkpoints/results.csv`, `checkpoints/test_details.csv`: kết quả tổng hợp và dự đoán chi tiết.
+- `baseline_cnn.py`: định nghĩa `BaselineCNN` và `ImprovedCNN`. Baseline có hai khối convolution rồi flatten. Improved có ba khối convolution, BatchNorm, LeakyReLU, dropout và pooling ra lưới 4×4 để giữ một phần thông tin vị trí.
+- `models.py`: chọn model theo tên; hỗ trợ `baseline`, `improved`, `resnet18`, `resnet18_se` và `efficientnet_b0`.
+- `train.py`: kiểm tra dữ liệu, chia train/validation/test, huấn luyện, chọn checkpoint theo validation và ghi metric. Các model trong script này dùng resize 128×128, augmentation khi train và ImageNet normalization.
+- `train_val.py`: các vòng lặp train và validation được `train.py` gọi.
+- `best.py` và `train_basic.py`: pipeline baseline cũ/độc lập; các lệnh trong quy trình hiện tại dùng `train.py`.
+- `checkpoints/<model>/`: checkpoint cùng metadata và kết quả của từng model.
 
-Pretrained nghĩa là model đã học đặc trưng ảnh tổng quát từ ImageNet trước khi fine-tune. Model chưa biết bốn lớp thời trang của dự án cho đến khi train trên dataset này.
+Mỗi lần huấn luyện lưu `<model>_best.pth` và `<model>_best.json`. Các bảng trong thư mục output gồm `results.csv`, `epoch_metrics.csv` và `test_details.csv`. Chạy từng model vào thư mục riêng để bảng kết quả không ghi đè nhau.
+
+Improved hiện dùng `AdaptiveAvgPool2d((4, 4))`. Một số chuỗi mô tả kiến trúc trong `baseline_cnn.py`, `models.py` và metadata cũ vẫn ghi GAP; phần mô tả đó chưa được cập nhật. Cấu trúc chạy thực tế nằm trong lớp `ImprovedCNN`.
 
 ### Đánh giá và phân tích
 
-- `evaluate.py`: đánh giá checkpoint trên tập test, ghi accuracy, precision/recall/F1, confusion matrix và ảnh dự đoán sai.
-- `visualize_tsne.py`: lấy đặc trưng của ảnh test và chiếu xuống 2D để quan sát phân bố theo lớp.
-- `eval_output/upgrade_resnet18/confusion_matrix.png`: xem các lớp model hay nhầm.
-- `eval_output/upgrade_resnet18/classification_report.csv`: chỉ số precision, recall, F1 và support theo lớp.
-- `eval_output/upgrade_resnet18/tsne.png`: biểu đồ đặc trưng; không phải thước đo accuracy.
-- `eval_output/upgrade_resnet18/predictions.csv`, `misclassified.csv`: kiểm tra dự đoán để phân tích lỗi.
+- `evaluate.py`: đánh giá checkpoint, ghi accuracy, precision/recall/F1, confusion matrix, dự đoán và ảnh Grad-CAM.
+- `visualize_tsne.py`: lấy đặc trưng ảnh test để vẽ t-SNE; biểu đồ giúp quan sát phân bố, không phải thước đo accuracy.
+- `eval_output/baseline_imagenet/`: nơi lưu báo cáo baseline được đánh giá với preprocessing đúng.
+- `eval_output/improved/` và `eval_output/resnet18/`: báo cáo đánh giá của các model tương ứng.
 
 ### Ứng dụng
 
-- `app.py`: nạp checkpoint và CSV nhãn, nhận ảnh upload, hiển thị Top 3, cảnh báo khi hai lớp đầu gần nhau, Grad-CAM và kết quả đánh giá offline.
-- `README.md`: hướng dẫn tổng quát, Colab và Docker; một số lệnh mẫu vẫn dùng dataset cũ.
+- `app.py`: nạp checkpoint và CSV, nhận ảnh upload, hiển thị Top 3, cảnh báo khi hai lớp đầu gần nhau và Grad-CAM.
+- `README.md`: hướng dẫn chạy ứng dụng, train, Docker và Colab.
 - `PROJECT_GUIDE.md`: bản đồ vai trò và luồng làm việc (tài liệu này).
 
 ## 3. Các phần việc và cách bàn giao
 
-- **Data:** đọc `prepare_data.py`, CSV và thư mục ảnh. Bàn giao số lượng ảnh/lớp, cách ghép ảnh với nhãn, quy tắc làm sạch, ví dụ ảnh và giới hạn dữ liệu.
-- **Model/train:** đọc `models.py`, `train.py`, `train_val.py`. Bàn giao kiến trúc, ý nghĩa pretrained, cấu hình train, log epoch và checkpoint được chọn.
-- **Đánh giá:** đọc `evaluate.py`, `visualize_tsne.py`. Bàn giao test accuracy, chỉ số theo lớp, confusion matrix, t-SNE, ví dụ lỗi và cách diễn giải.
+- **Data:** đọc `prepare_data.py`, CSV và thư mục ảnh. Bàn giao số ảnh/lớp, cách ghép ID với ảnh, quy tắc làm sạch và giới hạn dữ liệu.
+- **Model/train:** đọc `baseline_cnn.py`, `models.py`, `train.py` và `train_val.py`. Bàn giao kiến trúc, preprocessing, cấu hình train, log epoch và checkpoint được chọn.
+- **Đánh giá:** đọc `evaluate.py` và `visualize_tsne.py`. Bàn giao test accuracy, chỉ số theo lớp, confusion matrix, t-SNE, ví dụ lỗi và cách diễn giải.
 - **Demo:** đọc `app.py`. Bàn giao luồng sử dụng, ảnh chụp Top 3/Grad-CAM và giới hạn của các hiển thị.
-- **Tổng hợp:** đối chiếu dataset, checkpoint, seed và split giữa các phần; không trộn số liệu từ lần chạy hoặc dataset khác.
+- **Tổng hợp:** đối chiếu dataset, checkpoint, seed và split; không trộn số liệu từ lần chạy hoặc dataset khác.
 
-Khi một phần được bàn giao, nên kèm theo **đầu ra**, **cách tạo đầu ra** và **ý nghĩa/giới hạn** của nó. Như vậy người viết phần khác có thể trích dẫn kết quả mà không cần suy đoán.
+Khi bàn giao, kèm theo **đầu ra**, **cách tạo đầu ra** và **ý nghĩa/giới hạn** của nó để người viết phần khác có thể kiểm tra kết quả.
 
 ## 4. Quy trình chạy hiện tại
 
-Chạy từ thư mục gốc project trong PowerShell. Máy đã xác nhận: Windows, Python 3.14, PyTorch 2.15.0+cu132, NVIDIA RTX 4050 Laptop GPU 6 GB VRAM, RAM hệ thống 8 GB. Bắt đầu batch size 8.
+Chạy từ thư mục gốc dự án. Dataset cần có `clean_dataset.csv` và ảnh `training_images/<id>.jpg`.
 
-### Cài đặt và kiểm tra CUDA
+### Cài đặt
+
+Nếu môi trường `.venv` chưa được tạo:
 
 ```powershell
 py -m venv .venv
-.\.venv\Scripts\python.exe -m pip install -r requirements.txt
-.\.venv\Scripts\python.exe -m pip install --force-reinstall torch torchvision --index-url https://download.pytorch.org/whl/cu132
-.\.venv\Scripts\python.exe -c "import torch; print(torch.__version__); print('CUDA:', torch.cuda.is_available()); print(torch.cuda.get_device_name(0) if torch.cuda.is_available() else 'CPU')"
+python -m pip install -r requirements.txt
 ```
 
-Lệnh CUDA trên là cấu hình đã chạy thành công với Python 3.14 trên máy này. Máy khác cần chọn bản tương thích tại [trang cài PyTorch](https://pytorch.org/get-started/locally/).
+### Huấn luyện
 
-### Train
+Mỗi model ghi vào thư mục riêng. Mặc định split là 70% train, 20% validation, 10% test, stratified với seed 42.
 
 ```powershell
-.\.venv\Scripts\python.exe train.py --model resnet18 --csv datasets/upgrade_dataset.csv --image-dir datasets/anh_tong --epochs 10 --batch-size 8 --output-dir checkpoints
+python train.py --model baseline --csv clean_dataset.csv --image-dir training_images --epochs 10 --batch-size 32 --output-dir checkpoints/baseline
+python train.py --model improved --csv clean_dataset.csv --image-dir training_images --epochs 10 --batch-size 32 --output-dir checkpoints/improved
+python train.py --model resnet18 --csv clean_dataset.csv --image-dir training_images --epochs 10 --batch-size 32 --output-dir checkpoints/resnet18
 ```
 
-Script tự chọn CUDA nếu khả dụng, chia dữ liệu stratified theo seed 42, lưu checkpoint có validation accuracy cao nhất và in kết quả test.
+`train.py` tự chọn CUDA nếu khả dụng. ResNet18 dùng pretrained ImageNet mặc định; baseline và improved khởi tạo trọng số mới. Checkpoint được chọn theo validation accuracy, sau đó test được dùng để báo cáo.
 
 ### Đánh giá và t-SNE
 
+`train.py` chuẩn hóa đầu vào theo ImageNet cho cả ba model hiện tại. Vì vậy, khi đánh giá hoặc tạo t-SNE cho checkpoint từ script này, cần thêm `--imagenet_norm`.
+
 ```powershell
-.\.venv\Scripts\python.exe evaluate.py --model resnet18 --weights checkpoints/resnet18_best.pth --csv datasets/upgrade_dataset.csv --img_dir datasets/anh_tong --imagenet_norm --batch_size 8 --num_correct 0 --max_wrong 0 --out eval_output/upgrade_resnet18
-.\.venv\Scripts\python.exe visualize_tsne.py --model resnet18 --weights checkpoints/resnet18_best.pth --csv datasets/upgrade_dataset.csv --img_dir datasets/anh_tong --imagenet_norm --batch_size 8 --out eval_output/upgrade_resnet18/tsne.png
+python evaluate.py --model baseline --weights checkpoints/baseline/baseline_best.pth --csv clean_dataset.csv --img_dir training_images --imagenet_norm --out eval_output/baseline_imagenet
+python evaluate.py --model improved --weights checkpoints/improved/improved_best.pth --csv clean_dataset.csv --img_dir training_images --imagenet_norm --out eval_output/improved
+python evaluate.py --model resnet18 --weights checkpoints/resnet18/resnet18_best.pth --csv clean_dataset.csv --img_dir training_images --imagenet_norm --out eval_output/resnet18
+
+python visualize_tsne.py --model baseline --weights checkpoints/baseline/baseline_best.pth --csv clean_dataset.csv --img_dir training_images --imagenet_norm --out eval_output/baseline_imagenet/tsne.png
+python visualize_tsne.py --model improved --weights checkpoints/improved/improved_best.pth --csv clean_dataset.csv --img_dir training_images --imagenet_norm --out eval_output/improved/tsne.png
+python visualize_tsne.py --model resnet18 --weights checkpoints/resnet18/resnet18_best.pth --csv clean_dataset.csv --img_dir training_images --imagenet_norm --out eval_output/resnet18/tsne.png
 ```
 
-`evaluate.py` tạo confusion matrix và báo cáo lớp; `visualize_tsne.py` tạo riêng `tsne.png`. Cả hai dùng cùng seed/split test như train.
+Không dùng báo cáo baseline cũ ở `eval_output/baseline/` để so sánh: báo cáo đó được tạo khi thiếu `--imagenet_norm`. Lệnh baseline ở trên lưu kết quả đúng preprocessing sang `eval_output/baseline_imagenet/`.
 
 ### Chạy demo
 
+Ví dụ chạy ResNet18:
+
 ```powershell
 $env:FASHION_MODEL = "resnet18"
-$env:FASHION_MODEL_PATH = "checkpoints/resnet18_best.pth"
-$env:FASHION_CSV_PATH = "datasets/upgrade_dataset.csv"
-.\.venv\Scripts\python.exe -m streamlit run app.py
+$env:FASHION_MODEL_PATH = "checkpoints/resnet18/resnet18_best.pth"
+$env:FASHION_CSV_PATH = "clean_dataset.csv"
+$env:FASHION_EVAL_DIR = "eval_output/resnet18"
+python -m streamlit run app.py
 ```
 
-Tải ảnh lên, bấm nút phân tích và cuộn xuống để xem Top 3. Mục **Đánh giá mô hình trên tập test** là kết quả offline cố định, không đổi theo ảnh upload.
+CSV, thứ tự lớp và checkpoint phải thuộc cùng một dataset/lần train. Ứng dụng mặc định chọn baseline; đổi `FASHION_MODEL` và `FASHION_MODEL_PATH` khi dùng model khác.
 
 ## 5. Kết quả hiện tại
 
-- 8.032 ảnh, 2.008 ảnh/lớp; split: 5.621 train / 1.607 validation / 804 test (xấp xỉ 70/20/10, seed 42).
-- ResNet-18 pretrained ImageNet, fine-tune 10 epoch; checkpoint tốt nhất ở epoch 5.
-- Validation accuracy **93,71%**; test accuracy **93,16% (749/804)**; macro F1 **93,15%**.
-- F1 theo lớp: Casual Shoes **88,29%**, Shirts **98,26%**, Sports Shoes **87,53%**, Tshirts **98,51%**.
-- Nhầm lẫn lớn nhất: Sports Shoes → Casual Shoes (28 ảnh), Casual Shoes → Sports Shoes (20 ảnh).
+Các kết quả dưới đây lấy từ `checkpoints/<model>/results.csv` và `test_details.csv`. Mỗi model được đánh giá trên cùng split test 800 ảnh, 100 ảnh mỗi lớp.
 
-Các số này mô tả hiệu năng trên split test hiện tại, không đảm bảo kết quả tương tự với mọi ảnh ngoài thực tế. Top 3 là xác suất softmax tương đối giữa bốn lớp, chưa được hiệu chỉnh như độ tin cậy. Grad-CAM minh họa vùng ảnh ảnh hưởng tới đầu ra, không chứng minh model hiểu sản phẩm. t-SNE giúp quan sát đặc trưng; khoảng cách trên hình không phải accuracy.
+| Model | Best validation accuracy | Test accuracy | Macro F1 | Tham số |
+|---|---:|---:|---:|---:|
+| Baseline | 89,75% | 89,38% (715/800) | 89,38% | 267.240 |
+| Improved | 88,38% | 89,13% (713/800) | 89,02% | 110.088 |
+| ResNet18 | 93,50% | 95,00% (760/800) | 95,02% | 11.180.616 |
+
+ResNet18 hiện có test accuracy cao nhất trên split này. Improved gọn hơn baseline về số tham số nhưng kết quả hiện tại thấp hơn baseline 2 ảnh trên tập test; kiến trúc lớn hơn hoặc mới hơn không bảo đảm accuracy cao hơn.
+
+Kết quả là phép đo trên một split/seed cố định, không đảm bảo hiệu năng tương tự với ảnh ngoài thực tế. Top 3 là xác suất softmax tương đối giữa các lớp, chưa được hiệu chỉnh như độ tin cậy. Grad-CAM minh họa vùng ảnh ảnh hưởng tới đầu ra, không chứng minh model hiểu sản phẩm.
 
 ## 6. Dàn ý báo cáo và nguồn bằng chứng
 
-1. **Bài toán và dữ liệu:** bốn lớp, số ảnh/lớp, ghép ID với ảnh, làm sạch và giới hạn. Nguồn: CSV, `datasets/anh_tong/`.
-2. **Phương pháp:** ResNet-18 pretrained, fine-tune, resize 128×128, ImageNet normalization, augmentation, split stratified và seed. Nguồn: `models.py`, `train.py`, log train.
-3. **Kết quả:** validation/test accuracy, macro và per-class F1. Nguồn: log train, `epoch_metrics.csv`, `classification_report.csv`.
-4. **Phân tích:** confusion matrix, các cặp lớp nhầm, t-SNE và ví dụ ảnh sai. Nguồn: `confusion_matrix.png`, `tsne.png`, `misclassified.csv`.
-5. **Demo và giới hạn:** ảnh upload, Top 3, Grad-CAM; nêu rõ chỉ có bốn lớp và kết quả hiện tại đến từ một split/seed.
+1. **Bài toán và dữ liệu:** tám lớp, 1.000 ảnh/lớp, ghép ID với ảnh, quy tắc làm sạch và giới hạn. Nguồn: `clean_dataset.csv`, `training_images/`, `prepare_data.py`.
+2. **Phương pháp:** kiến trúc được chọn, resize 128×128, augmentation, ImageNet normalization, split stratified và seed. Nguồn: `baseline_cnn.py`, `models.py`, `train.py`.
+3. **Kết quả:** validation/test accuracy, macro và per-class F1. Nguồn: `checkpoints/<model>/results.csv`, `test_details.csv`.
+4. **Phân tích:** confusion matrix, các cặp lớp nhầm, t-SNE và ví dụ ảnh sai. Nguồn: `eval_output/<model>/confusion_matrix.png`, `tsne.png`, `misclassified.csv`.
+5. **Demo và giới hạn:** ảnh upload, Top 3, Grad-CAM; nêu rõ tám lớp và kết quả đến từ split/seed cụ thể.
 
-Trong báo cáo, ghi tên checkpoint, dataset, seed và split để người đọc đối chiếu. Không trộn metric từ lần chạy khác hoặc dataset cũ.
+Trong báo cáo, ghi tên checkpoint, dataset, seed và split để người đọc đối chiếu. Không trộn metric của lần chạy hoặc dataset khác.
 
 ## 7. Lưu ý khi chia sẻ với nhóm
 
-`.gitignore` đang loại `datasets/`, `checkpoints/` và `eval_output/` khỏi Git. Người clone source có thể không nhận được dữ liệu, checkpoint fine-tune hoặc hình báo cáo. Nhóm cần chia sẻ chúng riêng hoặc thống nhất nơi lưu; không giả định chúng được commit cùng mã nguồn. Trọng số pretrained ImageNet có thể tải lại, còn dataset và checkpoint của dự án cần được bảo quản.
+`.gitignore` bỏ qua checkpoint, kết quả đánh giá, ảnh và CSV/dữ liệu nặng. Người clone mã nguồn có thể không có `clean_dataset.csv`, `training_images/`, checkpoint hoặc ảnh báo cáo. Cần chia sẻ các đầu ra đó riêng hoặc thống nhất nơi lưu; không giả định chúng được commit cùng mã nguồn.

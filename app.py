@@ -11,7 +11,7 @@ from models import create_model
 
 
 PROJECT_DIR = Path(__file__).resolve().parent
-MODEL_PATH = Path(os.environ.get("FASHION_MODEL_PATH", str(PROJECT_DIR / "baseline_cnn.pth"))).expanduser()
+MODEL_PATH = Path(os.environ.get("FASHION_MODEL_PATH", str(PROJECT_DIR / "checkpoints" / "baseline" / "baseline_best.pth"))).expanduser()
 MODEL_NAME = os.environ.get("FASHION_MODEL", "baseline").lower()
 DATASET_PATH = Path(os.environ.get("FASHION_CSV_PATH", str(PROJECT_DIR / "clean_dataset.csv"))).expanduser()
 EVAL_DIR = Path(
@@ -47,7 +47,10 @@ def load_class_names() -> list[str]:
         )
         if len(classes) >= 2:
             return classes
-    return ["Casual Shoes", "Sunglasses", "Tshirts", "Watches"]
+    return [
+        "Casual Shoes", "Handbags", "Shirts", "Sports Shoes",
+        "Watches", "Tops", "Tshirts", "Jeans",
+    ]
 
 
 CLASS_NAMES = load_class_names()
