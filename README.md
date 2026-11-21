@@ -47,23 +47,3 @@ Evaluation and t-SNE use the same test split as training by default. Training ap
 ## Huấn luyện trên Google Colab
 
 Open `colab_train_resnet18.ipynb` in Colab and choose **Runtime > Change runtime type > GPU**. Put `colab_code.zip`, `anh_tong.zip`, and `datasets/upgrade_dataset.csv` in `MyDrive/fashion-product-classifier`, mount Drive in the notebook, then run the cells in order. The notebook saves the trained checkpoint and evaluation results back to Drive. Colab GPU availability and runtime limits vary; see the [official FAQ](https://research.google.com/colaboratory/faq.html).
-
-## Chạy bằng Docker Compose
-
-Docker đóng gói ứng dụng, thư viện Python và mã nguồn cần thiết. Ảnh training không cần cho màn hình dự đoán, còn checkpoint, CSV và kết quả đánh giá được mount read-only từ thư mục dự án:
-
-```bash
-docker compose up --build
-```
-
-Open <http://localhost:8501>. Stop with `Ctrl+C`, or run `docker compose down` in another terminal. Docker Desktop (or Docker Engine with the Compose plugin) must be installed. The container uses CPU PyTorch and does not require CUDA.
-
-To run a newly trained checkpoint in Compose, create a `.env` file in the project root. The `checkpoints` and `datasets` folders are mounted read-only into the container:
-
-```text
-FASHION_MODEL=resnet18
-FASHION_MODEL_PATH=/app/checkpoints/resnet18_best.pth
-FASHION_CSV_PATH=/app/clean_dataset.csv
-```
-
-Change `FASHION_CSV_PATH` to `/app/datasets/your_dataset.csv` when the matching CSV is in the local `datasets` folder.

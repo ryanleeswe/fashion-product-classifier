@@ -47,7 +47,7 @@ Pretrained nghĩa là model đã học đặc trưng ảnh tổng quát từ Ima
 ### Ứng dụng
 
 - `app.py`: nạp checkpoint và CSV nhãn, nhận ảnh upload, hiển thị Top 3, cảnh báo khi hai lớp đầu gần nhau, Grad-CAM và kết quả đánh giá offline.
-- `README.md`: hướng dẫn tổng quát, Colab và Docker; một số lệnh mẫu vẫn dùng dataset cũ.
+- `README.md`: hướng dẫn tổng quát, Colab và chạy ứng dụng trên máy cá nhân; một số lệnh mẫu vẫn dùng dataset cũ.
 - `PROJECT_GUIDE.md`: bản đồ vai trò và luồng làm việc (tài liệu này).
 
 ## 3. Các phần việc và cách bàn giao
