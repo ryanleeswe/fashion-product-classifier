@@ -6,10 +6,10 @@ from pathlib import Path
 
 from PIL import Image
 
-CSV_PATH = "clean_dataset_8000.csv"
-IMAGE_DIR = Path("anh_tong")
-OUTPUT_DIR = Path("anh_resize")
-OUTPUT_CSV = "resized_dataset.csv"
+CSV_PATH = "clean_dataset.csv"
+IMAGE_DIR = Path("training_images")
+OUTPUT_DIR = Path("training_images_resized")
+OUTPUT_CSV = "resized_clean_dataset.csv"
 
 IMAGE_SIZE = (128, 128)
 

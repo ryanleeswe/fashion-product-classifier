@@ -1,6 +1,7 @@
 # Bỏ qua toàn bộ ảnh gốc và ảnh đã lọc
 images/
 training_images/
+training_images_old/
 benchmark_images/
 
 # Bỏ qua các file dữ liệu nặng và file nén

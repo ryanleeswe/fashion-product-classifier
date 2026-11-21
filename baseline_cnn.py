@@ -1,4 +1,4 @@
-"""Mô hình CNN cơ sở để phân loại ảnh thời trang thành bốn loại."""
+"""Các mô hình CNN cơ sở cho bài toán phân loại tám lớp thời trang."""
 
 import torch
 from torch import nn
@@ -7,7 +7,7 @@ from torch import nn
 class BaselineCNN(nn.Module):
     """Phân loại ảnh RGB kích thước 128x128 thành các lớp sản phẩm."""
 
-    def __init__(self, num_classes: int = 4) -> None:
+    def __init__(self, num_classes: int = 8) -> None:
         super().__init__()
 
         # Các lớp trích xuất đặc trưng từ ảnh đầu vào.
@@ -33,7 +33,7 @@ class BaselineCNN(nn.Module):
 class ImprovedCNN(nn.Module):
     """CNN cải tiến với BatchNorm, LeakyReLU, Dropout và Global Average Pooling."""
 
-    def __init__(self, num_classes: int = 4, dropout_rate: float = 0.3) -> None:
+    def __init__(self, num_classes: int = 8, dropout_rate: float = 0.3) -> None:
         super().__init__()
 
         self.features = nn.Sequential(
@@ -50,13 +50,13 @@ class ImprovedCNN(nn.Module):
             nn.Conv2d(64, 128, kernel_size=3, padding=1),
             nn.BatchNorm2d(128),
             nn.LeakyReLU(negative_slope=0.01, inplace=True),
-            nn.AdaptiveAvgPool2d((1, 1)),
+            nn.AdaptiveAvgPool2d((4, 4)),
         )
 
         self.classifier = nn.Sequential(
             nn.Flatten(start_dim=1),
             nn.Dropout(p=dropout_rate),
-            nn.Linear(128, num_classes),
+            nn.Linear(128 * 4 * 4, num_classes),
         )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:

@@ -24,7 +24,7 @@ Chọn ResNet-18 làm nhánh phát triển vì residual connection cho phép tru
 
 ## Dữ liệu khó hơn
 
-Bộ hiện tại có bốn nhóm khá khác nhau (`Tshirts`, `Casual Shoes`, `Watches`, `Sunglasses`), nên chưa đủ để kết luận mô hình xử lý tốt các nhóm dễ nhầm. `make_benchmark_dataset.py` là tiện ích độc lập, không sửa `prepare_data.py`: chạy để liệt kê articleType trong `styles.csv`, rồi chọn các lớp gần nhau theo danh sách thật trong CSV. Chẳng hạn có thể xem xét nhóm áo gần nhau nếu các tên đó tồn tại trong tập dữ liệu. Mọi mô hình phải dùng cùng CSV benchmark và cùng ảnh.
+Dataset hiện tại có tám lớp cân bằng, mỗi lớp 1.000 ảnh. `make_benchmark_dataset.py` là tiện ích độc lập, không sửa `prepare_data.py`: chạy để liệt kê articleType trong `styles.csv`, rồi chọn một tập con các lớp gần nhau để so sánh. Mọi mô hình phải dùng cùng CSV benchmark và cùng ảnh.
 
 ## Cách chạy (PowerShell)
 
@@ -34,7 +34,7 @@ python make_benchmark_dataset.py --csv styles.csv --image-dir images
 
 # Thay tên ví dụ bằng các nhãn gần nhau có thật trong danh sách trên
 python make_benchmark_dataset.py --csv styles.csv --image-dir images `
-  --categories "Shirts,Tshirts,Tops,Sweatshirts" --samples-per-category 1000
+  --categories "Shirts,Tshirts,Heels,Sweatshirts" --samples-per-category 1000
 
 # So sánh mọi cấu hình trên cùng split
 python train.py --model all --csv benchmark_dataset.csv `
