@@ -39,20 +39,12 @@ The chart includes all labels in the selected CSV. Keep the CSV, image directory
 The CSV needs `id` and `articleType` columns, with each image stored as `<id>.jpg` under the image directory. Training and evaluation use a stratified 70/20/10 train/validation/test split by default, with seed 42.
 
 ```bash
-python train.py --model baseline --csv clean_dataset.csv --image-dir training_images --epochs 10 --batch-size 32 --output-dir checkpoints/baseline
-python evaluate.py --model baseline --weights checkpoints/baseline/baseline_best.pth --csv clean_dataset.csv --img_dir training_images --imagenet_norm --out eval_output/baseline
-python visualize_tsne.py --model baseline --weights checkpoints/baseline/baseline_best.pth --csv clean_dataset.csv --img_dir training_images --imagenet_norm --out eval_output/baseline/tsne.png
-
-python train.py --model improved --csv clean_dataset.csv --image-dir training_images --epochs 10 --batch-size 32 --output-dir checkpoints/improved
-python evaluate.py --model improved --weights checkpoints/improved/improved_best.pth --csv clean_dataset.csv --img_dir training_images --imagenet_norm --out eval_output/improved
-python visualize_tsne.py --model improved --weights checkpoints/improved/improved_best.pth --csv clean_dataset.csv --img_dir training_images --imagenet_norm --out eval_output/improved/tsne.png
-
 python train.py --model resnet18 --csv clean_dataset.csv --image-dir training_images --epochs 10 --batch-size 32 --output-dir checkpoints/resnet18
 python evaluate.py --model resnet18 --weights checkpoints/resnet18/resnet18_best.pth --csv clean_dataset.csv --img_dir training_images --imagenet_norm --out eval_output/resnet18
 python visualize_tsne.py --model resnet18 --weights checkpoints/resnet18/resnet18_best.pth --csv clean_dataset.csv --img_dir training_images --imagenet_norm --out eval_output/resnet18/tsne.png
 ```
 
-Evaluation and t-SNE use the same test split as training by default. Training applies ImageNet normalization, so include `--imagenet_norm` for evaluation and t-SNE. Try `--model improved` if you need a smaller model to train faster on CPU.
+Run commands from the project root. Training applies ImageNet normalization, so include `--imagenet_norm` for evaluation and t-SNE. Full commands for baseline and improved are in [PROJECT_GUIDE.md](PROJECT_GUIDE.md).
 
 ## Huấn luyện trên Google Colab
 

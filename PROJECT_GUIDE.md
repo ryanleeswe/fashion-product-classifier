@@ -44,7 +44,7 @@ Improved hiện dùng `AdaptiveAvgPool2d((4, 4))`. Một số chuỗi mô tả k
 
 - `evaluate.py`: đánh giá checkpoint, ghi accuracy, precision/recall/F1, confusion matrix, dự đoán và ảnh Grad-CAM.
 - `visualize_tsne.py`: lấy đặc trưng ảnh test để vẽ t-SNE; biểu đồ giúp quan sát phân bố, không phải thước đo accuracy.
-- `eval_output/baseline_imagenet/`: nơi lưu báo cáo baseline được đánh giá với preprocessing đúng.
+- `eval_output/baseline/`: nơi lưu báo cáo baseline được đánh giá với preprocessing ImageNet.
 - `eval_output/improved/` và `eval_output/resnet18/`: báo cáo đánh giá của các model tương ứng.
 
 ### Ứng dụng
@@ -93,16 +93,16 @@ python train.py --model resnet18 --csv clean_dataset.csv --image-dir training_im
 `train.py` chuẩn hóa đầu vào theo ImageNet cho cả ba model hiện tại. Vì vậy, khi đánh giá hoặc tạo t-SNE cho checkpoint từ script này, cần thêm `--imagenet_norm`.
 
 ```powershell
-python evaluate.py --model baseline --weights checkpoints/baseline/baseline_best.pth --csv clean_dataset.csv --img_dir training_images --imagenet_norm --out eval_output/baseline_imagenet
+python evaluate.py --model baseline --weights checkpoints/baseline/baseline_best.pth --csv clean_dataset.csv --img_dir training_images --imagenet_norm --out eval_output/baseline
 python evaluate.py --model improved --weights checkpoints/improved/improved_best.pth --csv clean_dataset.csv --img_dir training_images --imagenet_norm --out eval_output/improved
 python evaluate.py --model resnet18 --weights checkpoints/resnet18/resnet18_best.pth --csv clean_dataset.csv --img_dir training_images --imagenet_norm --out eval_output/resnet18
 
-python visualize_tsne.py --model baseline --weights checkpoints/baseline/baseline_best.pth --csv clean_dataset.csv --img_dir training_images --imagenet_norm --out eval_output/baseline_imagenet/tsne.png
+python visualize_tsne.py --model baseline --weights checkpoints/baseline/baseline_best.pth --csv clean_dataset.csv --img_dir training_images --imagenet_norm --out eval_output/baseline/tsne.png
 python visualize_tsne.py --model improved --weights checkpoints/improved/improved_best.pth --csv clean_dataset.csv --img_dir training_images --imagenet_norm --out eval_output/improved/tsne.png
 python visualize_tsne.py --model resnet18 --weights checkpoints/resnet18/resnet18_best.pth --csv clean_dataset.csv --img_dir training_images --imagenet_norm --out eval_output/resnet18/tsne.png
 ```
 
-Không dùng báo cáo baseline cũ ở `eval_output/baseline/` để so sánh: báo cáo đó được tạo khi thiếu `--imagenet_norm`. Lệnh baseline ở trên lưu kết quả đúng preprocessing sang `eval_output/baseline_imagenet/`.
+Nếu báo cáo baseline hiện có được tạo trước khi dùng `--imagenet_norm`, hãy chạy lại lệnh baseline ở trên để cập nhật `eval_output/baseline/` trước khi so sánh.
 
 ### Chạy demo
 

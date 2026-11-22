@@ -11,12 +11,24 @@ from models import create_model
 
 
 PROJECT_DIR = Path(__file__).resolve().parent
-MODEL_PATH = Path(os.environ.get("FASHION_MODEL_PATH", str(PROJECT_DIR / "checkpoints" / "baseline" / "baseline_best.pth"))).expanduser()
 MODEL_NAME = os.environ.get("FASHION_MODEL", "baseline").lower()
-DATASET_PATH = Path(os.environ.get("FASHION_CSV_PATH", str(PROJECT_DIR / "clean_dataset.csv"))).expanduser()
-EVAL_DIR = Path(
-    os.environ.get("FASHION_EVAL_DIR", str(PROJECT_DIR / "eval_output" / "upgrade_resnet18"))
-).expanduser()
+
+
+def project_path(value: str | Path) -> Path:
+    path = Path(value).expanduser()
+    return path if path.is_absolute() else PROJECT_DIR / path
+
+
+MODEL_PATH = project_path(
+    os.environ.get(
+        "FASHION_MODEL_PATH",
+        f"checkpoints/{MODEL_NAME}/{MODEL_NAME}_best.pth",
+    )
+)
+DATASET_PATH = project_path(os.environ.get("FASHION_CSV_PATH", "clean_dataset.csv"))
+EVAL_DIR = project_path(
+    os.environ.get("FASHION_EVAL_DIR", f"eval_output/{MODEL_NAME}")
+)
 IMAGE_SIZE = 128
 TOP_K = 3
 CONFUSION_MARGIN = 0.10  # Ngưỡng chênh Top-1/Top-2 là 10 phần trăm.
