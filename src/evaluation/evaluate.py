@@ -8,9 +8,9 @@ Làm 4 việc:
   4. Gom tất cả ảnh đoán sai vào một thư mục riêng để nhận xét và cải tiến.
 
 Ví dụ chạy:
-  python evaluate.py --model improved --weights best_model.pth
-  python evaluate.py --model baseline --weights baseline_cnn.pth
-  python evaluate.py --model resnet18 --weights best_resnet.pth --imagenet_norm
+  python -m src.evaluation.evaluate --model improved --weights best_model.pth
+  python -m src.evaluation.evaluate --model baseline --weights baseline_cnn.pth
+  python -m src.evaluation.evaluate --model resnet18 --weights best_resnet.pth --imagenet_norm
 
 Kết quả nằm trong thư mục --out (mặc định eval_output).
 """
@@ -33,7 +33,7 @@ from sklearn.model_selection import train_test_split
 from torch.utils.data import DataLoader, Dataset
 from torchvision import transforms
 
-from models import create_model
+from src.models.models import create_model
 
 IMG_SIZE = 128
 IMAGENET_MEAN = [0.485, 0.456, 0.406]

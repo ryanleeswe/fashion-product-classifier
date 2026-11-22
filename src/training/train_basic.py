@@ -1,10 +1,10 @@
 """
 train_basic.py - Train BaselineCNN 5 epoch rồi lưu baseline_cnn.pth.
 
-Chạy:  python3 train_basic.py
+Chạy:  python -m src.training.train_basic
 Chia dữ liệu 80/10/10 GIỐNG HỆT evaluate_basic.py (random_state=42), nên tập Test
 mà evaluate_basic.py dùng là ảnh mô hình chưa từng học.
-Cần các file cùng thư mục: baseline_cnn.py, train_val.py, best.py
+Cần các module trong src/models và src/training.
 """
 
 from pathlib import Path
@@ -16,20 +16,21 @@ from sklearn.model_selection import train_test_split
 from torch.utils.data import DataLoader, Dataset, Subset
 from torchvision import transforms
 
-from baseline_cnn import BaselineCNN
-from best import fit_best
+from src.models.baseline_cnn import BaselineCNN
+from src.training.best import fit_best
 
 # ----------------------------------------------------------------------------
 # CẤU HÌNH
 # ----------------------------------------------------------------------------
 LABEL_COL = "articleType"
 NUM_EPOCHS = 5
-SAVE_PATH = "baseline_cnn.pth"
+PROJECT_DIR = Path(__file__).resolve().parents[2]
+SAVE_PATH = str(PROJECT_DIR / "baseline_cnn.pth")
 
 
 def find_path(name):
-    """Tìm file/thư mục ở thư mục hiện tại hoặc trong resources/."""
-    for folder in [Path("."), Path("resources")]:
+    """Tìm file/thư mục tại thư mục gốc dự án hoặc trong resources/."""
+    for folder in [PROJECT_DIR, PROJECT_DIR / "resources"]:
         if (folder / name).exists():
             return folder / name
     raise FileNotFoundError(f"Không tìm thấy {name} (đã tìm ở . và resources/)")
@@ -85,4 +86,4 @@ history, best_val_acc = fit_best(
     num_epochs=NUM_EPOCHS, lr=1e-3, device="cpu", save_path=SAVE_PATH)
 
 print(f"\nXong. Đã lưu mô hình tốt nhất vào: {SAVE_PATH}")
-print("Giờ chạy: python evaluate.py")
+print("Giờ chạy: python -m src.evaluation.evaluate")

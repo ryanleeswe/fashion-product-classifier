@@ -1,12 +1,15 @@
 import pandas as pd
 import os
 import shutil
+from pathlib import Path
+
+PROJECT_DIR = Path(__file__).resolve().parents[1]
 
 # Configuration paths
-ORIGINAL_CSV = 'styles.csv'
-ORIGINAL_IMG_DIR = 'images'
-NEW_CSV = 'clean_dataset.csv'
-NEW_IMG_DIR = 'training_images'
+ORIGINAL_CSV = PROJECT_DIR / 'styles.csv'
+ORIGINAL_IMG_DIR = PROJECT_DIR / 'images'
+NEW_CSV = PROJECT_DIR / 'clean_dataset.csv'
+NEW_IMG_DIR = PROJECT_DIR / 'training_images'
 
 # Eight classes used by clean_dataset.csv (1,000 images per class).
 TARGET_CATEGORIES = [

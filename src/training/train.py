@@ -19,11 +19,11 @@ from sklearn.model_selection import train_test_split
 from torch.utils.data import DataLoader, Dataset
 from torchvision import transforms
 
-from models import MODEL_NAMES, count_parameters, create_model, model_description
-from train_val import train_one_epoch, validate
+from src.models.models import MODEL_NAMES, count_parameters, create_model, model_description
+from src.training.train_val import train_one_epoch, validate
 
 
-PROJECT_DIR = Path(__file__).resolve().parent
+PROJECT_DIR = Path(__file__).resolve().parents[2]
 IMAGENET_MEAN = (0.485, 0.456, 0.406)
 IMAGENET_STD = (0.229, 0.224, 0.225)
 

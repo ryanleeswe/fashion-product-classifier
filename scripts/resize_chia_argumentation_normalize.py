@@ -6,10 +6,11 @@ from pathlib import Path
 
 from PIL import Image
 
-CSV_PATH = "clean_dataset.csv"
-IMAGE_DIR = Path("training_images")
-OUTPUT_DIR = Path("training_images_resized")
-OUTPUT_CSV = "resized_clean_dataset.csv"
+PROJECT_DIR = Path(__file__).resolve().parents[1]
+CSV_PATH = PROJECT_DIR / "clean_dataset.csv"
+IMAGE_DIR = PROJECT_DIR / "training_images"
+OUTPUT_DIR = PROJECT_DIR / "training_images_resized"
+OUTPUT_CSV = PROJECT_DIR / "resized_clean_dataset.csv"
 
 IMAGE_SIZE = (128, 128)
 
@@ -68,7 +69,7 @@ val_df, test_df = train_test_split(
 )
 
 # Tạo thư mục lưu các CSV đã chia.
-output_dir = Path("split_dataset")
+output_dir = PROJECT_DIR / "split_dataset"
 output_dir.mkdir(exist_ok=True)
 
 # 5. Luu CSV

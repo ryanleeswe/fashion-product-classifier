@@ -10,7 +10,7 @@ from torch.utils.data import Dataset, DataLoader, Subset
 from torchvision import transforms
 
 # 1. Khai báo đường dẫn dữ liệu
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 CSV_PATH = os.path.join(BASE_DIR, "clean_dataset.csv")
 IMG_DIR = os.path.join(BASE_DIR, "training_images")
 

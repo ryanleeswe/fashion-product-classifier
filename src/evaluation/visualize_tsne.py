@@ -17,7 +17,7 @@ from sklearn.manifold import TSNE
 from torch.utils.data import DataLoader
 from torchvision import transforms
 
-from evaluate import IMG_SIZE, ImageDataset, build_model, split_train_val_test
+from src.evaluation.evaluate import IMG_SIZE, ImageDataset, build_model, split_train_val_test
 
 
 def main() -> None:

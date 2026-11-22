@@ -12,7 +12,6 @@ checkpoints/
 eval_output/
 datasets/
 .torch_cache/
-colab_code.zip
 streamlit*.log
 
 # Bỏ qua các file rác sinh ra trong quá trình chạy Python và Jupyter

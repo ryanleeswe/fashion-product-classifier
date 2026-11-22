@@ -6,15 +6,17 @@ from pathlib import Path
 
 import pandas as pd
 
+PROJECT_DIR = Path(__file__).resolve().parents[1]
+
 
 def parse_args():
     parser = argparse.ArgumentParser(
         description="Chọn các articleType gần nhau để tạo bộ dữ liệu benchmark."
     )
-    parser.add_argument("--csv", type=Path, default=Path("styles.csv"))
-    parser.add_argument("--image-dir", type=Path, default=Path("images"))
-    parser.add_argument("--output-csv", type=Path, default=Path("benchmark_dataset.csv"))
-    parser.add_argument("--output-image-dir", type=Path, default=Path("benchmark_images"))
+    parser.add_argument("--csv", type=Path, default=PROJECT_DIR / "styles.csv")
+    parser.add_argument("--image-dir", type=Path, default=PROJECT_DIR / "images")
+    parser.add_argument("--output-csv", type=Path, default=PROJECT_DIR / "benchmark_dataset.csv")
+    parser.add_argument("--output-image-dir", type=Path, default=PROJECT_DIR / "benchmark_images")
     parser.add_argument(
         "--categories",
         help="articleType cần lấy, phân cách dấu phẩy; phải khớp tên trong CSV.",

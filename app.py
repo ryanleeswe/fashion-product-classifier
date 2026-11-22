@@ -7,7 +7,7 @@ import streamlit as st
 import torch
 from PIL import Image
 
-from models import create_model
+from src.models.models import create_model
 
 
 PROJECT_DIR = Path(__file__).resolve().parent
@@ -227,7 +227,7 @@ with st.expander("📊 Đánh giá mô hình trên tập test", expanded=False):
         st.info(
             f"Chưa tìm thấy kết quả đánh giá trong `{EVAL_DIR}`. "
             "Hãy chép confusion_matrix.png, tsne.png và "
-            "classification_report.csv từ kết quả Colab vào thư mục này."
+            "classification_report.csv từ kết quả đánh giá vào thư mục này."
         )
     else:
         chart_col1, chart_col2 = st.columns(2)

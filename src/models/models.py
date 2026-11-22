@@ -5,7 +5,7 @@ from __future__ import annotations
 from torch import nn
 from torchvision import models
 
-from baseline_cnn import BaselineCNN, ImprovedCNN
+from src.models.baseline_cnn import BaselineCNN, ImprovedCNN
 
 
 MODEL_NAMES = ("baseline", "improved", "resnet18")

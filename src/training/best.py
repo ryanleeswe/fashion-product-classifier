@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 
-from train_val import train_one_epoch, validate
+from src.training.train_val import train_one_epoch, validate
 
 
 def fit_best(model, train_loader, val_loader, num_epochs=15, lr=1e-3,
