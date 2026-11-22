@@ -24,7 +24,7 @@ def main() -> None:
     if hasattr(sys.stdout, "reconfigure"):
         sys.stdout.reconfigure(encoding="utf-8", errors="replace")
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--model", default="baseline", choices=["baseline", "improved", "resnet18", "resnet18_se", "efficientnet_b0"])
+    parser.add_argument("--model", default="baseline", choices=["baseline", "improved", "resnet18"])
     parser.add_argument("--weights", default="baseline_cnn.pth")
     parser.add_argument("--csv", default="clean_dataset.csv")
     parser.add_argument("--img_dir", default="training_images")
@@ -77,10 +77,8 @@ def main() -> None:
         target = model.classifier
     elif args.model == "resnet18":
         target = model.fc
-    elif args.model == "resnet18_se":
-        target = model.classifier
     else:
-        target = model.classifier[1]
+        target = model.fc
 
     # Hook lưu vector đầu vào của lớp classification head cho từng batch ảnh.
     feature_batches: list[torch.Tensor] = []

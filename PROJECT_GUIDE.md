@@ -30,7 +30,7 @@ Kết quả test hiện có: ResNet18 đạt 95,00%, baseline 89,38%, improved 8
 ### Model và huấn luyện
 
 - `baseline_cnn.py`: định nghĩa `BaselineCNN` và `ImprovedCNN`. Baseline có hai khối convolution rồi flatten. Improved có ba khối convolution, BatchNorm, LeakyReLU, dropout và pooling ra lưới 4×4 để giữ một phần thông tin vị trí.
-- `models.py`: chọn model theo tên; hỗ trợ `baseline`, `improved`, `resnet18`, `resnet18_se` và `efficientnet_b0`.
+- `models.py`: chọn một trong ba model hiện dùng: `baseline`, `improved` và `resnet18`.
 - `train.py`: kiểm tra dữ liệu, chia train/validation/test, huấn luyện, chọn checkpoint theo validation và ghi metric. Các model trong script này dùng resize 128×128, augmentation khi train và ImageNet normalization.
 - `train_val.py`: các vòng lặp train và validation được `train.py` gọi.
 - `best.py` và `train_basic.py`: pipeline baseline cũ/độc lập; các lệnh trong quy trình hiện tại dùng `train.py`.

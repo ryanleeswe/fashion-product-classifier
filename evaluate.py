@@ -33,7 +33,6 @@ from sklearn.model_selection import train_test_split
 from torch.utils.data import DataLoader, Dataset
 from torchvision import transforms
 
-from baseline_cnn import BaselineCNN, ImprovedCNN
 from models import create_model
 
 IMG_SIZE = 128
@@ -97,10 +96,8 @@ def get_target_layer(model, name):
         return model.features[4]    # ReLU sau Conv thứ 2 -> 32x32x32
     if name == "improved":
         return model.features[10]   # LeakyReLU sau Conv thứ 3 -> 128x32x32
-    if name in ("resnet18", "resnet18_se"):
+    if name == "resnet18":
         return model.layer4[-1]
-    if name == "efficientnet_b0":
-        return model.features[-1]
     raise ValueError(name)
 
 
@@ -263,7 +260,7 @@ def main():
         sys.stdout.reconfigure(encoding="utf-8", errors="replace")
     p = argparse.ArgumentParser()
     p.add_argument("--model", default="improved",
-                   choices=["baseline", "improved", "resnet18", "resnet18_se", "efficientnet_b0"])
+                   choices=["baseline", "improved", "resnet18"])
     p.add_argument("--weights", default="best_model.pth")
     p.add_argument("--csv", default="clean_dataset.csv")
     p.add_argument("--img_dir", default="training_images")

@@ -93,10 +93,8 @@ def make_gradcam(
     gradients: list[torch.Tensor] = []
     if model_name in ("baseline", "improved"):
         target_layer = model.features[3] if model_name == "baseline" else model.features[10]
-    elif model_name in ("resnet18", "resnet18_se"):
+    elif model_name == "resnet18":
         target_layer = model.layer4[-1]
-    elif model_name == "efficientnet_b0":
-        target_layer = model.features[-1]
     else:
         raise ValueError(f"Model chưa hỗ trợ: {model_name}")
 

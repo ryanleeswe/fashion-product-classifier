@@ -71,7 +71,7 @@ def parse_args():
     parser.add_argument(
         "--no-pretrained",
         action="store_true",
-        help="Không tải trọng số ImageNet cho ResNet18/EfficientNet-B0.",
+        help="Không tải trọng số ImageNet cho ResNet18.",
     )
     return parser.parse_args()
 
@@ -179,16 +179,13 @@ def build_loaders(csv_path, image_dir, batch_size, val_size, test_size, seed, de
 
 def create_optimizer(model, model_name, learning_rate, weight_decay):
     # ResNet được fine-tune với learning rate nhỏ hơn ở backbone và lớn hơn ở head.
-    if model_name in {"resnet18", "resnet18_se"}:
+    if model_name == "resnet18":
         backbone = [
             parameter
             for name, parameter in model.named_parameters()
-            if not name.startswith(("fc.", "classifier.", "channel_attention."))
+            if not name.startswith("fc.")
         ]
-        if model_name == "resnet18":
-            head = list(model.fc.parameters())
-        else:
-            head = list(model.classifier.parameters()) + list(model.channel_attention.parameters())
+        head = list(model.fc.parameters())
         return torch.optim.AdamW(
             [
                 {"params": backbone, "lr": learning_rate * 0.1},
@@ -196,15 +193,6 @@ def create_optimizer(model, model_name, learning_rate, weight_decay):
             ],
             weight_decay=weight_decay,
         )
-    if model_name == "efficientnet_b0":
-        return torch.optim.AdamW(
-            [
-                {"params": model.features.parameters(), "lr": learning_rate * 0.1},
-                {"params": model.classifier.parameters(), "lr": learning_rate},
-            ],
-            weight_decay=weight_decay,
-        )
-
     return torch.optim.AdamW(
         model.parameters(), lr=learning_rate, weight_decay=weight_decay
     )
@@ -313,8 +301,7 @@ def run_model(
     result = {
         "model": model_name,
         "architecture": model_description(model_name),
-        "pretrained": model_name in {"resnet18", "resnet18_se", "efficientnet_b0"}
-        and not args.no_pretrained,
+        "pretrained": model_name == "resnet18" and not args.no_pretrained,
         "num_classes": len(classes),
         "parameters": total_params,
         "trainable_parameters": trainable_params,
